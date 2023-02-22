@@ -1,15 +1,34 @@
 <template>
   <div class="app">
-    <Navigation />
-    <div class="app-content">
-      <RouterView />
+    <template v-if="!isMobile">
+      <Navigation />
+      <div class="app-content">
+        <RouterView />
+      </div>
+    </template>
+    <div v-else class="app-mobile-msg">
+      <h2>Sorry, this app is not supported on Mobile Devices</h2>
+      <p>To use this app, please use a computer or Tablet.</p>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { onMounted, ref } from "vue";
 import { RouterView } from "vue-router";
 import Navigation from "@/components/Navigation.vue";
+
+const isMobile = ref(false);
+
+onMounted(() => {
+  // TODO add throttle
+  window.addEventListener("resize", checkScreen);
+});
+
+const checkScreen = () => {
+  const windowWindth = window.innerWidth;
+  isMobile.value = windowWindth <= 750 ? true : false;
+};
 </script>
 
 <style lang="less">
@@ -36,6 +55,10 @@ body {
     padding: 0 20px;
     flex: 1;
     position: relative;
+  }
+  &-mobile-msg {
+    margin: auto;
+    color: #fff;
   }
 }
 
