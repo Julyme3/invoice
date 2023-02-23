@@ -3,6 +3,7 @@
     <template v-if="!isMobile">
       <Navigation />
       <div class="app-content">
+        <InvoiceModal />
         <RouterView />
       </div>
     </template>
@@ -17,6 +18,7 @@
 import { onMounted, ref } from "vue";
 import { RouterView } from "vue-router";
 import Navigation from "@/components/Navigation.vue";
+import InvoiceModal from "@/components/InvoiceModal.vue";
 
 const isMobile = ref(false);
 
@@ -73,6 +75,7 @@ li {
 
 button,
 .button {
+  box-sizing: border-box;
   cursor: pointer;
   padding: 16px 24px;
   border-radius: 30px;
@@ -80,6 +83,11 @@ button,
   font-size: 12px;
   margin-right: 8px;
   color: #fff;
+}
+
+.input,
+.select {
+  box-sizing: border-box;
 }
 .dark-purple {
   background-color: #252945;
