@@ -14,4 +14,11 @@ export default defineConfig({
   server: {
     port: 8080,
   },
+  css: {
+    preprocessorOptions: {
+      less: {
+        additionalData: `@import "@/styles/variables.less";`,
+      },
+    },
+  },
 });

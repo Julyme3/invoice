@@ -255,9 +255,6 @@ const addNewInvoiceItem = () => {};
 </script>
 
 <style scoped lang="less">
-//breakpoints
-@tablet-widths: ~"(min-width: 900px)";
-
 .invoice-wrap {
   position: fixed;
   top: 0;
@@ -265,7 +262,7 @@ const addNewInvoiceItem = () => {};
   width: 100%;
   height: 100vh;
   overflow: auto;
-  color: #fff;
+  color: @white;
   z-index: 1;
 
   @media @tablet-widths {
@@ -277,8 +274,8 @@ const addNewInvoiceItem = () => {};
     padding: 56px;
     max-width: 700px;
     width: 100%;
-    background-color: #141625;
-    color: #fff;
+    background-color: @blue;
+    color: @white;
     box-shadow: 10px 4px 6px -1px rgba(0, 0, 0, 0.2),
       0 2px 4px -1px rgba(0, 0, 0, 0.06);
   }
@@ -286,17 +283,17 @@ const addNewInvoiceItem = () => {};
 
 .modal-title {
   margin-bottom: 48px;
-  color: #fff;
+  color: @white;
 }
 
 .item-title {
   margin-bottom: 16px;
   font-size: 18px;
-  color: #777f98;
+  color: @grey;
 }
 
 .bill-title {
-  color: #7c5dfa;
+  color: @light-blue;
   font-size: 12px;
   margin-bottom: 24px;
 }
@@ -376,8 +373,8 @@ const addNewInvoiceItem = () => {};
   }
 
   .button {
-    color: #fff;
-    background-color: #252945;
+    color: @white;
+    background-color: @dark-grey;
     align-items: center;
     justify-content: center;
     width: 100%;
@@ -385,16 +382,16 @@ const addNewInvoiceItem = () => {};
 }
 
 .btn-upd {
-  background-color: #252945;
+  background-color: @dark-grey;
 }
 
 .btn-create {
-  background-color: #7c5dfa;
+  background-color: @light-blue;
 }
 
 .btn-save,
 .btn-cancel {
-  background-color: #ec5757;
+  background-color: @red;
 }
 
 .save {
@@ -422,8 +419,8 @@ const addNewInvoiceItem = () => {};
 .input,
 .select {
   width: 100%;
-  background-color: #1e2139;
-  color: #fff;
+  background-color: @dark-blue;
+  color: @white;
   border-radius: 4px;
   padding: 12px 4px;
   border: none;

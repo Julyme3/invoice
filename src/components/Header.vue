@@ -30,9 +30,6 @@ const createInvoice = () => {};
 </script>
 
 <style scoped lang="less">
-//breakpoints
-@tablet-widths: ~"(min-width: 900px)";
-
 .header {
   display: flex;
   margin-bottom: 65px;
@@ -47,7 +44,7 @@ const createInvoice = () => {};
     position: absolute;
     width: 120px;
     top: 25px;
-    background-color: #1e2139;
+    background-color: @dark-blue;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
       0 2px 4px -1px rgba(0, 0, 0, 0.06);
   }
@@ -57,8 +54,8 @@ const createInvoice = () => {};
     padding: 10px 20px;
 
     &:hover {
-      color: #1e2139;
-      background-color: #fff;
+      color: @dark-blue;
+      background-color: @white;
     }
   }
 }
@@ -78,6 +75,6 @@ const createInvoice = () => {};
   font-size: 12px;
   padding: 8px 10px;
   border-radius: 40px;
-  background-color: #7c5dfa;
+  background-color: @light-blue;
 }
 </style>
