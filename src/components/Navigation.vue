@@ -21,7 +21,7 @@
   flex-direction: row;
   background-color: #1e2139;
 
-  @media (min-width: 900px) {
+  @media @tablet-widths {
     min-height: 100%;
     min-width: 90px;
     flex-direction: column;

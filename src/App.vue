@@ -42,6 +42,15 @@ body {
   font-family: "Poppins", sans-serif;
 }
 
+ul {
+  margin: 0;
+  padding: 0;
+}
+
+li {
+  list-style: none;
+}
+
 .app {
   display: flex;
   flex-direction: column;
@@ -123,5 +132,13 @@ button,
   }
   color: #dfe3fa;
   background-color: rgba(223, 227, 250, 0.1);
+}
+
+.flex-column {
+  flex-direction: column;
+}
+
+.flex {
+  display: flex;
 }
 </style>
