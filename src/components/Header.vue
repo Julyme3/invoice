@@ -14,19 +14,24 @@
           <li class="filter-item">Clear filter</li>
         </ul>
       </div>
-      <button @click="createInvoice" class="btn">New invoice</button>
+      <button @click="createInvoice" class="button btn">New invoice</button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from "vue";
+import { useInvoiceStore } from "@/stores/invoice";
+
+const invoiceStore = useInvoiceStore();
 
 const isFilterShown = ref(false);
 const toggleFilterMenu = () => {
   isFilterShown.value = !isFilterShown.value;
 };
-const createInvoice = () => {};
+const createInvoice = () => {
+  invoiceStore.toggleModalShown();
+};
 </script>
 
 <style scoped lang="less">
@@ -75,6 +80,7 @@ const createInvoice = () => {};
   font-size: 12px;
   padding: 8px 10px;
   border-radius: 40px;
+  color: @white;
   background-color: @light-blue;
 }
 </style>

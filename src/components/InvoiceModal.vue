@@ -227,6 +227,9 @@
 
 <script setup lang="ts">
 import { reactive } from "vue";
+import { useInvoiceStore } from "@/stores/invoice";
+
+const invoiceStore = useInvoiceStore();
 
 const stateForm = reactive({
   billerStreetAddress: null,
@@ -252,6 +255,9 @@ const stateForm = reactive({
 });
 const submitForm = () => {};
 const addNewInvoiceItem = () => {};
+const closeInvoice = () => {
+  invoiceStore.toggleModalShown();
+};
 </script>
 
 <style scoped lang="less">
@@ -264,6 +270,11 @@ const addNewInvoiceItem = () => {};
   overflow: auto;
   color: @white;
   z-index: 1;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
   @media @tablet-widths {
     left: 90px;
@@ -271,6 +282,7 @@ const addNewInvoiceItem = () => {};
 
   .invoice-content {
     position: relative;
+    box-sizing: border-box;
     padding: 56px;
     max-width: 700px;
     width: 100%;

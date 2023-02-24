@@ -3,7 +3,10 @@
     <template v-if="!isMobile">
       <Navigation />
       <div class="app-content">
-        <InvoiceModal />
+        <transition name="invoice">
+          <InvoiceModal v-if="invoiceStore.isInvoiceModalShown" />
+        </transition>
+
         <RouterView />
       </div>
     </template>
@@ -20,7 +23,9 @@ import { RouterView } from "vue-router";
 import Navigation from "@/components/Navigation.vue";
 import InvoiceModal from "@/components/InvoiceModal.vue";
 import { mobileWidth } from "@/constants";
+import { useInvoiceStore } from "@/stores/invoice";
 
+const invoiceStore = useInvoiceStore();
 const isMobile = ref(false);
 
 onMounted(() => {
@@ -53,5 +58,16 @@ const checkScreen = () => {
     margin: auto;
     color: @white;
   }
+}
+
+// animated invoice modal
+.invoice-enter-active,
+.invoice-leave-active {
+  transition: 0.8s ease transform;
+}
+
+.invoice-enter-from,
+.invoice-leave-to {
+  transform: translateX(-790px);
 }
 </style>
