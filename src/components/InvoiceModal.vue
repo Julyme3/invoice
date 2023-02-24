@@ -177,7 +177,7 @@
             </tr>
             <tr
               class="table-items flex"
-              v-for="(item, index) in invoiceItemList"
+              v-for="(item, index) in stateForm.invoiceItemList"
               :key="index"
             >
               <td class="item-name">
@@ -192,7 +192,11 @@
               <td class="total flex">
                 ${{ (item.total = item.qty * item.price) }}
               </td>
-              <!--              <img @click="deleteInvoiceItem(item.id)" src="@/assets/icon-delete.svg" alt="" />-->
+              <SvgIcon
+                class="delete-icon"
+                @click="deleteInvoiceItem(item.id)"
+                name="icon-delete"
+              />
             </tr>
           </table>
 
@@ -227,7 +231,9 @@
 
 <script setup lang="ts">
 import { reactive, watch } from "vue";
+import { v4 as uuid4 } from "uuid";
 import { useInvoiceStore } from "@/stores/invoice";
+import SvgIcon from "@/components/SvgIcon.vue";
 
 const invoiceStore = useInvoiceStore();
 
@@ -251,9 +257,19 @@ interface Invoice {
   productDescription: null;
   invoicePending: null;
   invoiceDraft: null;
-  invoiceItemList: [];
+  invoiceItemList: LineItem[];
   invoiceTotal: number;
 }
+//
+// TODO replace to types.ts
+interface LineItem {
+  id: string;
+  itemName: string;
+  qty: string;
+  price: number;
+  total: number;
+}
+
 const stateForm: Invoice = reactive({
   billerStreetAddress: null,
   billerCity: null,
@@ -304,9 +320,23 @@ watch(
 //
 
 const submitForm = () => {};
-const addNewInvoiceItem = () => {};
 const closeInvoice = () => {
   invoiceStore.toggleModalShown();
+};
+
+const addNewInvoiceItem = () => {
+  stateForm.invoiceItemList.push({
+    id: uuid4(),
+    itemName: "",
+    qty: "",
+    price: 0,
+    total: 0,
+  });
+};
+const deleteInvoiceItem = (id: string) => {
+  stateForm.invoiceItemList = stateForm.invoiceItemList.filter(
+    (item) => item.id !== id
+  );
 };
 </script>
 
@@ -423,14 +453,6 @@ const closeInvoice = () => {
     .table-items {
       position: relative;
       margin-bottom: 24px;
-
-      //img {
-      //  position: absolute;
-      //  top: 15px;
-      //  right: 0;
-      //  width: 12px;
-      //  height: 16px;
-      //}
     }
   }
 
@@ -441,6 +463,14 @@ const closeInvoice = () => {
     justify-content: center;
     width: 100%;
   }
+}
+
+.delete-icon {
+  position: absolute;
+  top: 15px;
+  right: 0;
+  width: 12px;
+  height: 16px;
 }
 
 .btn-upd {

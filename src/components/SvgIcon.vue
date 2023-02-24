@@ -1,5 +1,5 @@
 <template>
-  <component :is="icon" />
+  <component class="svg-container" :is="icon" />
 </template>
 
 <script setup lang="ts">
@@ -15,5 +15,6 @@ const icon = defineAsyncComponent(() => import(`@/assets/${props.name}.svg`));
 <style scoped lang="less">
 .svg-container {
   display: inline-flex;
+  cursor: pointer;
 }
 </style>
