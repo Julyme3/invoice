@@ -30,6 +30,8 @@ import Popup from "@/components/Popup.vue";
 const invoiceStore = useInvoiceStore();
 const isMobile = ref(false);
 
+invoiceStore.fetchInvoices();
+
 onMounted(() => {
   // TODO add throttle
   window.addEventListener("resize", checkScreen);
