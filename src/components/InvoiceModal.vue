@@ -13,7 +13,7 @@
             required
             type="text"
             id="billerStreetAddress"
-            v-model="billerStreetAddress"
+            v-model="stateForm.billerStreetAddress"
           />
         </div>
         <div class="location-details flex">
@@ -24,7 +24,7 @@
               required
               type="text"
               id="billerCity"
-              v-model="billerCity"
+              v-model="stateForm.billerCity"
             />
           </div>
           <div class="input-wrap flex flex-column flex-item">
@@ -34,7 +34,7 @@
               required
               type="text"
               id="billerZipCode"
-              v-model="billerZipCode"
+              v-model="stateForm.billerZipCode"
             />
           </div>
           <div class="input-wrap flex flex-column flex-item">
@@ -44,7 +44,7 @@
               required
               type="text"
               id="billerCountry"
-              v-model="billerCountry"
+              v-model="stateForm.billerCountry"
             />
           </div>
         </div>
@@ -60,7 +60,7 @@
             required
             type="text"
             id="clientName"
-            v-model="clientName"
+            v-model="stateForm.clientName"
           />
         </div>
         <div class="input-wrap flex flex-column flex-item">
@@ -70,7 +70,7 @@
             required
             type="text"
             id="clientEmail"
-            v-model="clientEmail"
+            v-model="stateForm.clientEmail"
           />
         </div>
         <div class="input-wrap flex flex-column flex-item">
@@ -80,7 +80,7 @@
             required
             type="text"
             id="clientStreetAddress"
-            v-model="clientStreetAddress"
+            v-model="stateForm.clientStreetAddress"
           />
         </div>
         <div class="location-details flex">
@@ -91,7 +91,7 @@
               required
               type="text"
               id="clientCity"
-              v-model="clientCity"
+              v-model="stateForm.clientCity"
             />
           </div>
           <div class="input-wrap flex flex-column flex-item">
@@ -101,7 +101,7 @@
               required
               type="text"
               id="clientZipCode"
-              v-model="clientZipCode"
+              v-model="stateForm.clientZipCode"
             />
           </div>
           <div class="input-wrap flex flex-column flex-item">
@@ -111,7 +111,7 @@
               required
               type="text"
               id="clientCountry"
-              v-model="clientCountry"
+              v-model="stateForm.clientCountry"
             />
           </div>
         </div>
@@ -163,7 +163,7 @@
             required
             type="text"
             id="productDescription"
-            v-model="productDescription"
+            v-model="stateForm.productDescription"
           />
         </div>
         <div class="work-items">
@@ -230,8 +230,10 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, watch } from "vue";
+import { reactive, watch, computed } from "vue";
 import { v4 as uuid4 } from "uuid";
+import db from "@/firebase/init";
+import { collection, addDoc } from "firebase/firestore";
 import { useInvoiceStore } from "@/stores/invoice";
 import SvgIcon from "@/components/SvgIcon.vue";
 
@@ -255,10 +257,9 @@ interface Invoice {
   paymentDueDateUnix: number;
   paymentDueDate: string;
   productDescription: null;
-  invoicePending: null;
-  invoiceDraft: null;
+  invoicePending: boolean;
+  invoiceDraft: boolean;
   invoiceItemList: LineItem[];
-  invoiceTotal: number;
 }
 //
 // TODO replace to types.ts
@@ -287,10 +288,9 @@ const stateForm: Invoice = reactive({
   paymentDueDateUnix: 0,
   paymentDueDate: "",
   productDescription: null,
-  invoicePending: null,
-  invoiceDraft: null,
+  invoicePending: false,
+  invoiceDraft: false,
   invoiceItemList: [],
-  invoiceTotal: 0,
 });
 
 // replace to utils for date formatting
@@ -319,7 +319,56 @@ watch(
 );
 //
 
-const submitForm = () => {};
+const inVoiceTotal = computed(() => {
+  return stateForm.invoiceItemList.reduce((acc, curr) => {
+    return (acc += curr.total);
+  }, 0);
+});
+
+const uploadInvoice = async () => {
+  if (!stateForm.invoiceItemList.length) {
+    alert("Please ensure you filled out work items!");
+    return;
+  }
+
+  // TODO: add interface for db API
+  await addDoc(collection(db, "invoices"), {
+    invoiceId: uuid4(),
+    billerStreetAddress: stateForm.billerStreetAddress,
+    billerCity: stateForm.billerCity,
+    billerZipCode: stateForm.billerZipCode,
+    billerCountry: stateForm.billerCountry,
+    clientName: stateForm.clientName,
+    clientEmail: stateForm.clientEmail,
+    clientStreetAddress: stateForm.clientStreetAddress,
+    clientCity: stateForm.clientCity,
+    clientZipCode: stateForm.clientZipCode,
+    clientCountry: stateForm.clientCountry,
+    invoiceDate: stateForm.invoiceDate,
+    invoiceDateUnix: stateForm.invoiceDateUnix,
+    paymentTerms: stateForm.paymentTerms,
+    paymentDueDate: stateForm.paymentDueDate,
+    paymentDueDateUnix: stateForm.paymentDueDateUnix,
+    productDescription: stateForm.productDescription,
+    invoiceItemList: stateForm.invoiceItemList,
+    invoiceTotal: inVoiceTotal.value,
+    invoicePending: stateForm.invoicePending,
+    invoiceDraft: stateForm.invoiceDraft,
+    invoicePaid: null,
+  });
+
+  invoiceStore.toggleModalShown();
+};
+const submitForm = () => {
+  uploadInvoice();
+};
+const publishInvoice = () => {
+  stateForm.invoicePending = true;
+};
+const saveDraft = () => {
+  stateForm.invoiceDraft = true;
+};
+
 const closeInvoice = () => {
   invoiceStore.toggleModalShown();
 };
