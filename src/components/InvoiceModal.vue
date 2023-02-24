@@ -127,7 +127,7 @@
               disabled
               type="text"
               id="invoiceDate"
-              v-model="invoiceDate"
+              v-model="stateForm.invoiceDate"
             />
           </div>
           <div class="flex flex-column flex-item">
@@ -137,7 +137,7 @@
               disabled
               type="text"
               id="paymentDueDate"
-              v-model="paymentDueDate"
+              v-model="stateForm.paymentDueDate"
             />
           </div>
         </div>
@@ -148,7 +148,7 @@
             required
             type="text"
             id="paymentTerms"
-            v-model="paymentTerms"
+            v-model="stateForm.paymentTerms"
           >
             <option value="30">Net 30 Days</option>
             <option value="60">Net 60 Days</option>
@@ -226,12 +226,35 @@
 </template>
 
 <script setup lang="ts">
-import { reactive } from "vue";
+import { reactive, watch } from "vue";
 import { useInvoiceStore } from "@/stores/invoice";
 
 const invoiceStore = useInvoiceStore();
 
-const stateForm = reactive({
+// TODO replace to types.ts
+interface Invoice {
+  billerStreetAddress: null;
+  billerCity: null;
+  billerZipCode: null;
+  billerCountry: null;
+  clientName: null;
+  clientEmail: null;
+  clientStreetAddress: null;
+  clientCity: null;
+  clientZipCode: null;
+  clientCountry: null;
+  invoiceDateUnix: number;
+  invoiceDate: null | string;
+  paymentTerms: string;
+  paymentDueDateUnix: number;
+  paymentDueDate: string;
+  productDescription: null;
+  invoicePending: null;
+  invoiceDraft: null;
+  invoiceItemList: [];
+  invoiceTotal: number;
+}
+const stateForm: Invoice = reactive({
   billerStreetAddress: null,
   billerCity: null,
   billerZipCode: null,
@@ -242,17 +265,44 @@ const stateForm = reactive({
   clientCity: null,
   clientZipCode: null,
   clientCountry: null,
-  invoiceDateUnix: null,
+  invoiceDateUnix: 0,
   invoiceDate: null,
-  paymentTerms: null,
-  paymentDueDateUnix: null,
-  paymentDueDate: null,
+  paymentTerms: "30",
+  paymentDueDateUnix: 0,
+  paymentDueDate: "",
   productDescription: null,
   invoicePending: null,
   invoiceDraft: null,
   invoiceItemList: [],
   invoiceTotal: 0,
 });
+
+// replace to utils for date formatting
+stateForm.invoiceDateUnix = Date.now();
+stateForm.invoiceDate = new Date(stateForm.invoiceDateUnix).toLocaleDateString(
+  "en-us",
+  { year: "numeric", month: "short", day: "numeric" }
+);
+
+watch(
+  () => stateForm.paymentTerms,
+  () => {
+    const futureDate = new Date();
+    stateForm.paymentDueDateUnix = futureDate.setDate(
+      futureDate.getDate() + parseInt(stateForm.paymentTerms)
+    );
+    stateForm.paymentDueDate = new Date(
+      stateForm.paymentDueDateUnix
+    ).toLocaleDateString("en-us", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  },
+  { immediate: true }
+);
+//
+
 const submitForm = () => {};
 const addNewInvoiceItem = () => {};
 const closeInvoice = () => {
