@@ -3,6 +3,7 @@
     <template v-if="!isMobile">
       <Navigation />
       <div class="app-content">
+        <Popup v-show="invoiceStore.isPopupShown" />
         <transition name="invoice">
           <InvoiceModal v-if="invoiceStore.isInvoiceModalShown" />
         </transition>
@@ -24,6 +25,7 @@ import Navigation from "@/components/Navigation.vue";
 import InvoiceModal from "@/components/InvoiceModal.vue";
 import { mobileWidth } from "@/constants";
 import { useInvoiceStore } from "@/stores/invoice";
+import Popup from "@/components/Popup.vue";
 
 const invoiceStore = useInvoiceStore();
 const isMobile = ref(false);

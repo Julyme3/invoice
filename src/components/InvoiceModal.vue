@@ -1,5 +1,9 @@
 <template>
-  <div ref="invoiceWrap" class="invoice-wrap flex flex-column">
+  <div
+    @click="checkClick"
+    ref="invoiceWrap"
+    class="invoice-wrap flex flex-column"
+  >
     <form @submit.prevent="submitForm" class="invoice-content">
       <Loading v-show="isLoading" />
       <h2 class="modal-title">New Invoice</h2>
@@ -392,6 +396,13 @@ const deleteInvoiceItem = (id: string) => {
   stateForm.invoiceItemList = stateForm.invoiceItemList.filter(
     (item) => item.id !== id
   );
+};
+
+const invoiceWrap = ref(null);
+const checkClick = (e: Event) => {
+  if (e.target === invoiceWrap.value) {
+    invoiceStore.togglePopupShown();
+  }
 };
 </script>
 
