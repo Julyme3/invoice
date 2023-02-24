@@ -1,6 +1,7 @@
 <template>
   <div ref="invoiceWrap" class="invoice-wrap flex flex-column">
     <form @submit.prevent="submitForm" class="invoice-content">
+      <Loading v-show="isLoading" />
       <h2 class="modal-title">New Invoice</h2>
 
       <!-- Bill From -->
@@ -230,12 +231,13 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, watch, computed } from "vue";
+import { reactive, watch, computed, ref } from "vue";
 import { v4 as uuid4 } from "uuid";
 import db from "@/firebase/init";
 import { collection, addDoc } from "firebase/firestore";
 import { useInvoiceStore } from "@/stores/invoice";
 import SvgIcon from "@/components/SvgIcon.vue";
+import Loading from "@/components/Loading.vue";
 
 const invoiceStore = useInvoiceStore();
 
@@ -325,12 +327,15 @@ const inVoiceTotal = computed(() => {
   }, 0);
 });
 
+const isLoading = ref(false);
+
 const uploadInvoice = async () => {
   if (!stateForm.invoiceItemList.length) {
     alert("Please ensure you filled out work items!");
     return;
   }
 
+  isLoading.value = true;
   // TODO: add interface for db API
   await addDoc(collection(db, "invoices"), {
     invoiceId: uuid4(),
@@ -357,6 +362,7 @@ const uploadInvoice = async () => {
     invoicePaid: null,
   });
 
+  isLoading.value = false;
   invoiceStore.toggleModalShown();
 };
 const submitForm = () => {
