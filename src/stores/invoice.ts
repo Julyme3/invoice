@@ -10,6 +10,14 @@ export const useInvoiceStore = defineStore("invoice", {
       invoicesData: [],
     };
   },
+  getters: {
+    getUserById: (state) => {
+      return (id: string) =>
+        state.invoicesData.find((invoice) => {
+          return invoice.invoiceId === id;
+        });
+    },
+  },
   actions: {
     toggleModalShown() {
       this.isInvoiceModalShown = !this.isInvoiceModalShown;
