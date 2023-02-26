@@ -6,7 +6,7 @@
   >
     <form @submit.prevent="submitForm" class="invoice-content">
       <Loading v-show="isLoading" />
-      <h2 class="modal-title">New Invoice</h2>
+      <h2 class="modal-title">{{ title }}</h2>
 
       <!-- Bill From -->
       <div class="bill-from flex flex-column">
@@ -217,17 +217,29 @@
           </button>
         </div>
         <div class="save-right flex">
-          <button type="submit" @click="saveDraft" class="button btn-save">
+          <button
+            v-if="!invoiceStore.isEditingInvoice"
+            type="submit"
+            @click="saveDraft"
+            class="button btn-save"
+          >
             Save Draft
           </button>
           <button
+            v-if="!invoiceStore.isEditingInvoice"
             type="submit"
             @click="publishInvoice"
             class="button btn-create"
           >
             Create Invoice
           </button>
-          <!--          <button type="sumbit" class="button btn-upd">Update Invoice</button>-->
+          <button
+            v-if="invoiceStore.isEditingInvoice"
+            type="submit"
+            class="button btn-upd"
+          >
+            Update Invoice
+          </button>
         </div>
       </div>
     </form>
@@ -235,7 +247,8 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, watch, computed, ref } from "vue";
+import { watch, computed, ref } from "vue";
+import { useRoute } from "vue-router";
 import { v4 as uuid4 } from "uuid";
 import db from "@/firebase/init";
 import { collection, addDoc } from "firebase/firestore";
@@ -244,6 +257,7 @@ import SvgIcon from "@/components/SvgIcon.vue";
 import Loading from "@/components/Loading.vue";
 
 const invoiceStore = useInvoiceStore();
+const route = useRoute();
 
 // TODO replace to types.ts
 interface Invoice {
@@ -277,7 +291,7 @@ interface LineItem {
   total: number;
 }
 
-const stateForm: Invoice = reactive({
+const stateForm: Invoice = ref({
   billerStreetAddress: null,
   billerCity: null,
   billerZipCode: null,
@@ -300,21 +314,32 @@ const stateForm: Invoice = reactive({
 });
 
 // replace to utils for date formatting
-stateForm.invoiceDateUnix = Date.now();
-stateForm.invoiceDate = new Date(stateForm.invoiceDateUnix).toLocaleDateString(
-  "en-us",
-  { year: "numeric", month: "short", day: "numeric" }
-);
+if (!invoiceStore.isEditingInvoice) {
+  stateForm.value.invoiceDateUnix = Date.now();
+  stateForm.value.invoiceDate = new Date(
+    stateForm.value.invoiceDateUnix
+  ).toLocaleDateString("en-us", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+} else {
+  stateForm.value = invoiceStore.getInvoiceById(route.params.id as string)!;
+}
+
+const title = computed(() => {
+  return invoiceStore.isEditingInvoice ? "Edit Invoice" : "New Invoice";
+});
 
 watch(
-  () => stateForm.paymentTerms,
+  () => stateForm.value.paymentTerms,
   () => {
     const futureDate = new Date();
-    stateForm.paymentDueDateUnix = futureDate.setDate(
-      futureDate.getDate() + parseInt(stateForm.paymentTerms)
+    stateForm.value.paymentDueDateUnix = futureDate.setDate(
+      futureDate.getDate() + parseInt(stateForm.value.paymentTerms)
     );
-    stateForm.paymentDueDate = new Date(
-      stateForm.paymentDueDateUnix
+    stateForm.value.paymentDueDate = new Date(
+      stateForm.value.paymentDueDateUnix
     ).toLocaleDateString("en-us", {
       year: "numeric",
       month: "short",
@@ -326,7 +351,7 @@ watch(
 //
 
 const inVoiceTotal = computed(() => {
-  return stateForm.invoiceItemList.reduce((acc, curr) => {
+  return stateForm.value.invoiceItemList.reduce((acc, curr) => {
     return (acc += curr.total);
   }, 0);
 });
@@ -334,7 +359,7 @@ const inVoiceTotal = computed(() => {
 const isLoading = ref(false);
 
 const uploadInvoice = async () => {
-  if (!stateForm.invoiceItemList.length) {
+  if (!stateForm.value.invoiceItemList.length) {
     alert("Please ensure you filled out work items!");
     return;
   }
@@ -343,26 +368,26 @@ const uploadInvoice = async () => {
   // TODO: add interface for db API
   await addDoc(collection(db, "invoices"), {
     invoiceId: uuid4(),
-    billerStreetAddress: stateForm.billerStreetAddress,
-    billerCity: stateForm.billerCity,
-    billerZipCode: stateForm.billerZipCode,
-    billerCountry: stateForm.billerCountry,
-    clientName: stateForm.clientName,
-    clientEmail: stateForm.clientEmail,
-    clientStreetAddress: stateForm.clientStreetAddress,
-    clientCity: stateForm.clientCity,
-    clientZipCode: stateForm.clientZipCode,
-    clientCountry: stateForm.clientCountry,
-    invoiceDate: stateForm.invoiceDate,
-    invoiceDateUnix: stateForm.invoiceDateUnix,
-    paymentTerms: stateForm.paymentTerms,
-    paymentDueDate: stateForm.paymentDueDate,
-    paymentDueDateUnix: stateForm.paymentDueDateUnix,
-    productDescription: stateForm.productDescription,
-    invoiceItemList: stateForm.invoiceItemList,
+    billerStreetAddress: stateForm.value.billerStreetAddress,
+    billerCity: stateForm.value.billerCity,
+    billerZipCode: stateForm.value.billerZipCode,
+    billerCountry: stateForm.value.billerCountry,
+    clientName: stateForm.value.clientName,
+    clientEmail: stateForm.value.clientEmail,
+    clientStreetAddress: stateForm.value.clientStreetAddress,
+    clientCity: stateForm.value.clientCity,
+    clientZipCode: stateForm.value.clientZipCode,
+    clientCountry: stateForm.value.clientCountry,
+    invoiceDate: stateForm.value.invoiceDate,
+    invoiceDateUnix: stateForm.value.invoiceDateUnix,
+    paymentTerms: stateForm.value.paymentTerms,
+    paymentDueDate: stateForm.value.paymentDueDate,
+    paymentDueDateUnix: stateForm.value.paymentDueDateUnix,
+    productDescription: stateForm.value.productDescription,
+    invoiceItemList: stateForm.value.invoiceItemList,
     invoiceTotal: inVoiceTotal.value,
-    invoicePending: stateForm.invoicePending,
-    invoiceDraft: stateForm.invoiceDraft,
+    invoicePending: stateForm.value.invoicePending,
+    invoiceDraft: stateForm.value.invoiceDraft,
     invoicePaid: null,
   });
 
@@ -373,10 +398,10 @@ const submitForm = () => {
   uploadInvoice();
 };
 const publishInvoice = () => {
-  stateForm.invoicePending = true;
+  stateForm.value.invoicePending = true;
 };
 const saveDraft = () => {
-  stateForm.invoiceDraft = true;
+  stateForm.value.invoiceDraft = true;
 };
 
 const closeInvoice = () => {
@@ -384,7 +409,7 @@ const closeInvoice = () => {
 };
 
 const addNewInvoiceItem = () => {
-  stateForm.invoiceItemList.push({
+  stateForm.value.invoiceItemList.push({
     id: uuid4(),
     itemName: "",
     qty: "",
@@ -393,7 +418,7 @@ const addNewInvoiceItem = () => {
   });
 };
 const deleteInvoiceItem = (id: string) => {
-  stateForm.invoiceItemList = stateForm.invoiceItemList.filter(
+  stateForm.value.invoiceItemList = stateForm.value.invoiceItemList.filter(
     (item) => item.id !== id
   );
 };

@@ -8,10 +8,11 @@ export const useInvoiceStore = defineStore("invoice", {
       isInvoiceModalShown: false,
       isPopupShown: false,
       invoicesData: [],
+      isEditingInvoice: false,
     };
   },
   getters: {
-    getUserById: (state) => {
+    getInvoiceById: (state) => {
       return (id: string) =>
         state.invoicesData.find((invoice) => {
           return invoice.invoiceId === id;
@@ -21,6 +22,10 @@ export const useInvoiceStore = defineStore("invoice", {
   actions: {
     toggleModalShown() {
       this.isInvoiceModalShown = !this.isInvoiceModalShown;
+      this.isEditingInvoice = false;
+    },
+    setEditingInvoice() {
+      this.isEditingInvoice = true;
     },
     togglePopupShown() {
       this.isPopupShown = !this.isPopupShown;

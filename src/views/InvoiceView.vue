@@ -1,5 +1,5 @@
 <template>
-  <div v-if="currentInvoice" class="invoice-view container">
+  <div v-if="currentInvoice" class="invoice-view">
     <router-link class="nav-link flex" :to="{ name: 'Home' }">
       Go Back
     </router-link>
@@ -124,12 +124,22 @@ const route = useRoute();
 const invoiceStore = useInvoiceStore();
 
 const currentInvoice = computed(() => {
-  return invoiceStore.getUserById(route.params.id as string);
+  return invoiceStore.getInvoiceById(route.params.id as string);
 });
+
+const toggleEditInvoice = () => {
+  invoiceStore.toggleModalShown();
+  invoiceStore.setEditingInvoice();
+};
 </script>
 
 <style scoped lang="less">
 .invoice-view {
+  padding: 40px 10px;
+
+  @media @tablet-widths {
+    padding-top: 72px;
+  }
   .nav-link {
     margin-bottom: 32px;
     align-items: center;
@@ -208,7 +218,7 @@ const currentInvoice = computed(() => {
       .billing-items {
         padding: 32px;
         border-radius: 20px 20px 0 0;
-        background-color: @light-blue;
+        background-color: @grey;
 
         .heading {
           font-size: 12px;
