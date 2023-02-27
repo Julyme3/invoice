@@ -1,6 +1,12 @@
 import { defineStore } from "pinia";
 import db from "@/firebase/init";
-import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  deleteDoc,
+  doc,
+  updateDoc,
+} from "firebase/firestore";
 
 export const useInvoiceStore = defineStore("invoice", {
   state: () => {
@@ -67,6 +73,25 @@ export const useInvoiceStore = defineStore("invoice", {
     async deleteInvoice(docId: string) {
       const docRef = doc(db, "invoices", docId);
       await deleteDoc(docRef);
+    },
+    async updateStatusToPaid(docId: string) {
+      const docRef = doc(db, "invoices", docId);
+      await updateDoc(docRef, {
+        invoicePaid: true,
+        invoicePending: false,
+      });
+
+      await this.fetchInvoices();
+    },
+    async updateStatusToPending(docId: string) {
+      const docRef = doc(db, "invoices", docId);
+      await updateDoc(docRef, {
+        invoicePaid: false,
+        invoicePending: true,
+        invoiceDraft: false,
+      });
+
+      await this.fetchInvoices();
     },
   },
 });

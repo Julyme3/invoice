@@ -138,6 +138,13 @@ const deleteInvoice = async (docId: string) => {
   await invoiceStore.fetchInvoices();
   router.push({ name: "Home" });
 };
+
+const updateStatusToPaid = (docId: string) => {
+  invoiceStore.updateStatusToPaid(docId);
+};
+const updateStatusToPending = (docId: string) => {
+  invoiceStore.updateStatusToPending(docId);
+};
 </script>
 
 <style scoped lang="less">
