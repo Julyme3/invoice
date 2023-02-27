@@ -1,8 +1,12 @@
 <template>
   <main class="home">
-    <Header />
-    <template v-if="invoices.length">
-      <Invoice v-for="(invoice, i) in invoices" :key="i" :invoice="invoice" />
+    <Header v-model="filter" />
+    <template v-if="filteredInvoices.length">
+      <Invoice
+        v-for="(invoice, i) in filteredInvoices"
+        :key="i"
+        :invoice="invoice"
+      />
     </template>
     <div v-else class="home-empty flex flex-column">
       <img class="home-img" src="../assets/illustration-empty.svg" alt="" />
@@ -15,13 +19,22 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import Header from "@/components/Header.vue";
 import Invoice from "@/components/Invoice.vue";
 
 import { useInvoiceStore } from "@/stores/invoice";
 const invoiceStore = useInvoiceStore();
-const invoices = computed(() => invoiceStore.invoicesData);
+const filter = ref("");
+const filteredInvoices = computed(() => {
+  if (!filter.value) {
+    return invoiceStore.invoicesData;
+  }
+
+  return invoiceStore.invoicesData.filter((invoice) => {
+    return invoice[filter.value];
+  });
+});
 </script>
 
 <style scoped lang="less">

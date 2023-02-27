@@ -8,10 +8,46 @@
       <div class="filter" @click="toggleFilterMenu">
         <span class="filter-title">Filter by status</span>
         <ul v-show="isFilterShown" class="filter-menu">
-          <li class="filter-item">Draft</li>
-          <li class="filter-item">Pending</li>
-          <li class="filter-item">Paid</li>
-          <li class="filter-item">Clear filter</li>
+          <li class="filter-item">
+            <label class="filter-label">
+              <input
+                class="filter-input"
+                v-model="localFilter"
+                type="radio"
+                value="invoiceDraft"
+              />Draft
+            </label>
+          </li>
+          <li class="filter-item">
+            <label class="filter-label">
+              <input
+                class="filter-input"
+                v-model="localFilter"
+                type="radio"
+                value="invoicePending"
+              />Pending
+            </label>
+          </li>
+          <li class="filter-item">
+            <label class="filter-label">
+              <input
+                class="filter-input"
+                v-model="localFilter"
+                type="radio"
+                value="invoicePaid"
+              />Paid
+            </label>
+          </li>
+          <li class="filter-item">
+            <label class="filter-label">
+              <input
+                class="filter-input"
+                v-model="localFilter"
+                type="radio"
+                value=""
+              />Clear filter
+            </label>
+          </li>
         </ul>
       </div>
       <button @click="createInvoice" class="button btn">New invoice</button>
@@ -20,10 +56,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useInvoiceStore } from "@/stores/invoice";
 
 const invoiceStore = useInvoiceStore();
+const props = defineProps<{
+  modelValue: string;
+}>();
+const emit = defineEmits(["update:modelValue"]);
+
+const localFilter = computed({
+  get() {
+    return props.modelValue;
+  },
+  set(value) {
+    emit("update:modelValue", value);
+  },
+});
 
 const isFilterShown = ref(false);
 const toggleFilterMenu = () => {
@@ -45,6 +94,18 @@ const createInvoice = () => {
   margin-right: 40px;
   cursor: pointer;
 
+  &-input {
+    display: none;
+  }
+
+  &-label {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    cursor: pointer;
+    padding: 10px 20px;
+  }
+
   &-menu {
     position: absolute;
     width: 120px;
@@ -56,7 +117,6 @@ const createInvoice = () => {
 
   &-item {
     font-size: 12px;
-    padding: 10px 20px;
 
     &:hover {
       color: @dark-blue;
