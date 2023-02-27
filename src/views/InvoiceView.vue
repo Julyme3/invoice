@@ -116,11 +116,12 @@
 </template>
 
 <script setup lang="ts">
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { useInvoiceStore } from "@/stores/invoice";
 import { computed } from "vue";
 
 const route = useRoute();
+const router = useRouter();
 const invoiceStore = useInvoiceStore();
 
 const currentInvoice = computed(() => {
@@ -130,6 +131,12 @@ const currentInvoice = computed(() => {
 const toggleEditInvoice = () => {
   invoiceStore.toggleModalShown();
   invoiceStore.setEditingInvoice();
+};
+
+const deleteInvoice = async (docId: string) => {
+  await invoiceStore.deleteInvoice(docId);
+  await invoiceStore.fetchInvoices();
+  router.push({ name: "Home" });
 };
 </script>
 

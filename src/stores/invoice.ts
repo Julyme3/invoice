@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import db from "@/firebase/init";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 
 export const useInvoiceStore = defineStore("invoice", {
   state: () => {
@@ -63,6 +63,10 @@ export const useInvoiceStore = defineStore("invoice", {
         process.push(data);
       });
       this.invoicesData = [...process];
+    },
+    async deleteInvoice(docId: string) {
+      const docRef = doc(db, "invoices", docId);
+      await deleteDoc(docRef);
     },
   },
 });
