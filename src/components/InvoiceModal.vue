@@ -251,7 +251,7 @@ import { watch, computed, ref } from "vue";
 import { useRoute } from "vue-router";
 import { v4 as uuid4 } from "uuid";
 import db from "@/firebase/init";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, updateDoc, doc } from "firebase/firestore";
 import { useInvoiceStore } from "@/stores/invoice";
 import SvgIcon from "@/components/SvgIcon.vue";
 import Loading from "@/components/Loading.vue";
@@ -261,6 +261,7 @@ const route = useRoute();
 
 // TODO replace to types.ts
 interface Invoice {
+  docId: null | string;
   billerStreetAddress: null;
   billerCity: null;
   billerZipCode: null;
@@ -292,6 +293,7 @@ interface LineItem {
 }
 
 const stateForm: Invoice = ref({
+  docId: null,
   billerStreetAddress: null,
   billerCity: null,
   billerZipCode: null,
@@ -324,7 +326,9 @@ if (!invoiceStore.isEditingInvoice) {
     day: "numeric",
   });
 } else {
-  stateForm.value = invoiceStore.getInvoiceById(route.params.id as string)!;
+  stateForm.value = JSON.parse(
+    JSON.stringify(invoiceStore.getInvoiceById(route.params.id as string)!)
+  );
 }
 
 const title = computed(() => {
@@ -393,9 +397,48 @@ const uploadInvoice = async () => {
 
   isLoading.value = false;
   invoiceStore.toggleModalShown();
+  invoiceStore.fetchInvoices();
 };
+
+const updateInvoice = async () => {
+  if (!stateForm.value.invoiceItemList.length) {
+    alert("Please ensure you filled out work items!");
+    return;
+  }
+
+  isLoading.value = true;
+  const invoiceRef = doc(db, "invoices", stateForm.value.docId);
+
+  await updateDoc(invoiceRef, {
+    billerStreetAddress: stateForm.value.billerStreetAddress,
+    billerCity: stateForm.value.billerCity,
+    billerZipCode: stateForm.value.billerZipCode,
+    billerCountry: stateForm.value.billerCountry,
+    clientName: stateForm.value.clientName,
+    clientEmail: stateForm.value.clientEmail,
+    clientStreetAddress: stateForm.value.clientStreetAddress,
+    clientCity: stateForm.value.clientCity,
+    clientZipCode: stateForm.value.clientZipCode,
+    clientCountry: stateForm.value.clientCountry,
+    paymentTerms: stateForm.value.paymentTerms,
+    paymentDueDate: stateForm.value.paymentDueDate,
+    paymentDueDateUnix: stateForm.value.paymentDueDateUnix,
+    productDescription: stateForm.value.productDescription,
+    invoiceItemList: stateForm.value.invoiceItemList,
+    invoiceTotal: stateForm.value.invoiceTotal,
+  });
+
+  isLoading.value = false;
+  invoiceStore.toggleModalShown();
+  invoiceStore.fetchInvoices();
+};
+
 const submitForm = () => {
-  uploadInvoice();
+  if (invoiceStore.isEditingInvoice) {
+    updateInvoice();
+  } else {
+    uploadInvoice();
+  }
 };
 const publishInvoice = () => {
   stateForm.value.invoicePending = true;

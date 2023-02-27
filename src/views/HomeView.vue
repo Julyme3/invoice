@@ -15,12 +15,13 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from "vue";
 import Header from "@/components/Header.vue";
 import Invoice from "@/components/Invoice.vue";
 
 import { useInvoiceStore } from "@/stores/invoice";
 const invoiceStore = useInvoiceStore();
-const invoices = invoiceStore.invoicesData;
+const invoices = computed(() => invoiceStore.invoicesData);
 </script>
 
 <style scoped lang="less">
