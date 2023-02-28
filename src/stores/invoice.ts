@@ -21,7 +21,7 @@ export const useInvoiceStore = defineStore("invoice", {
     getInvoiceById: (state) => {
       return (id: string) =>
         state.invoicesData.find((invoice) => {
-          return invoice.invoiceId === id;
+          return invoice.docId === id;
         });
     },
   },
@@ -43,7 +43,6 @@ export const useInvoiceStore = defineStore("invoice", {
       results.forEach((doc) => {
         const data = {
           docId: doc.id,
-          invoiceId: doc.data().invoiceId,
           billerStreetAddress: doc.data().billerStreetAddress,
           billerCity: doc.data().billerCity,
           billerZipCode: doc.data().billerZipCode,

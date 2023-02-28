@@ -250,6 +250,8 @@
 import { watch, computed, ref } from "vue";
 import { useRoute } from "vue-router";
 import { v4 as uuid4 } from "uuid";
+import { IInvoice } from "@/types/invoice";
+import { ILineItem } from "@/types/lineItem";
 import db from "@/firebase/init";
 import { collection, addDoc, updateDoc, doc } from "firebase/firestore";
 import { useInvoiceStore } from "@/stores/invoice";
@@ -259,60 +261,28 @@ import Loading from "@/components/Loading.vue";
 const invoiceStore = useInvoiceStore();
 const route = useRoute();
 
-// TODO replace to types.ts
-interface Invoice {
-  docId: null | string;
-  billerStreetAddress: null;
-  billerCity: null;
-  billerZipCode: null;
-  billerCountry: null;
-  clientName: null;
-  clientEmail: null;
-  clientStreetAddress: null;
-  clientCity: null;
-  clientZipCode: null;
-  clientCountry: null;
-  invoiceDateUnix: number;
-  invoiceDate: null | string;
-  paymentTerms: string;
-  paymentDueDateUnix: number;
-  paymentDueDate: string;
-  productDescription: null;
-  invoicePending: boolean;
-  invoiceDraft: boolean;
-  invoiceItemList: LineItem[];
-}
-//
-// TODO replace to types.ts
-interface LineItem {
-  id: string;
-  itemName: string;
-  qty: string;
-  price: number;
-  total: number;
-}
-
-const stateForm: Invoice = ref({
-  docId: null,
-  billerStreetAddress: null,
-  billerCity: null,
-  billerZipCode: null,
-  billerCountry: null,
-  clientName: null,
-  clientEmail: null,
-  clientStreetAddress: null,
-  clientCity: null,
-  clientZipCode: null,
-  clientCountry: null,
+const stateForm = ref<IInvoice>({
+  billerStreetAddress: "",
+  billerCity: "",
+  billerZipCode: "",
+  billerCountry: "",
+  clientName: "",
+  clientEmail: "",
+  clientStreetAddress: "",
+  clientCity: "",
+  clientZipCode: "",
+  clientCountry: "",
   invoiceDateUnix: 0,
   invoiceDate: null,
   paymentTerms: "30",
   paymentDueDateUnix: 0,
   paymentDueDate: "",
-  productDescription: null,
+  productDescription: "",
   invoicePending: false,
   invoiceDraft: false,
   invoiceItemList: [],
+  invoicePaid: false,
+  invoiceTotal: 0,
 });
 
 // replace to utils for date formatting
@@ -370,8 +340,7 @@ const uploadInvoice = async () => {
 
   isLoading.value = true;
   // TODO: add interface for db API
-  await addDoc(collection(db, "invoices"), {
-    invoiceId: uuid4(),
+  const data: IInvoice = {
     billerStreetAddress: stateForm.value.billerStreetAddress,
     billerCity: stateForm.value.billerCity,
     billerZipCode: stateForm.value.billerZipCode,
@@ -392,8 +361,9 @@ const uploadInvoice = async () => {
     invoiceTotal: inVoiceTotal.value,
     invoicePending: stateForm.value.invoicePending,
     invoiceDraft: stateForm.value.invoiceDraft,
-    invoicePaid: null,
-  });
+    invoicePaid: false,
+  };
+  await addDoc(collection(db, "invoices"), data);
 
   isLoading.value = false;
   invoiceStore.toggleModalShown();
@@ -407,9 +377,9 @@ const updateInvoice = async () => {
   }
 
   isLoading.value = true;
-  const invoiceRef = doc(db, "invoices", stateForm.value.docId);
+  const invoiceRef = doc(db, "invoices", stateForm.value.docId!);
 
-  await updateDoc(invoiceRef, {
+  const data: Partial<IInvoice> = {
     billerStreetAddress: stateForm.value.billerStreetAddress,
     billerCity: stateForm.value.billerCity,
     billerZipCode: stateForm.value.billerZipCode,
@@ -426,7 +396,9 @@ const updateInvoice = async () => {
     productDescription: stateForm.value.productDescription,
     invoiceItemList: stateForm.value.invoiceItemList,
     invoiceTotal: stateForm.value.invoiceTotal,
-  });
+  };
+
+  await updateDoc(invoiceRef, data);
 
   isLoading.value = false;
   invoiceStore.toggleModalShown();
@@ -452,13 +424,14 @@ const closeInvoice = () => {
 };
 
 const addNewInvoiceItem = () => {
-  stateForm.value.invoiceItemList.push({
+  const item: ILineItem = {
     id: uuid4(),
     itemName: "",
     qty: "",
     price: 0,
     total: 0,
-  });
+  };
+  stateForm.value.invoiceItemList.push(item);
 };
 const deleteInvoiceItem = (id: string) => {
   stateForm.value.invoiceItemList = stateForm.value.invoiceItemList.filter(
@@ -466,7 +439,7 @@ const deleteInvoiceItem = (id: string) => {
   );
 };
 
-const invoiceWrap = ref(null);
+const invoiceWrap = ref<HTMLDivElement | null>(null);
 const checkClick = (e: Event) => {
   if (e.target === invoiceWrap.value) {
     invoiceStore.togglePopupShown();

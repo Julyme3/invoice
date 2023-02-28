@@ -1,10 +1,10 @@
 <template>
   <router-link
     class="invoice flex"
-    :to="{ name: 'Invoice', params: { id: invoice.invoiceId } }"
+    :to="{ name: 'Invoice', params: { id: invoice.docId } }"
   >
     <div class="invoice-left flex">
-      <span class="invoice-text tracking-number">#{{ invoice.invoiceId }}</span>
+      <span class="invoice-text tracking-number">#{{ invoice.docId }}</span>
       <span class="invoice-text due-date">{{ invoice.paymentDueDate }}</span>
       <span class="invoice-text person">{{ invoice.clientName }}</span>
     </div>

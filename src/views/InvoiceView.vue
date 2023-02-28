@@ -52,7 +52,7 @@
       <div class="top flex">
         <div class="left flex flex-column top-inner">
           <p class="invoice-view-trim">
-            <span>#</span>{{ currentInvoice.invoiceId }}
+            <span>#</span>{{ currentInvoice.docId }}
           </p>
           <p>{{ currentInvoice.productDescription }}</p>
         </div>
