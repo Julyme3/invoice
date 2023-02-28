@@ -251,7 +251,6 @@ import { watch, computed, ref } from "vue";
 import { useRoute } from "vue-router";
 import { v4 as uuid4 } from "uuid";
 import { IInvoice } from "@/types/invoice";
-import { ILineItem } from "@/types/lineItem";
 import db from "@/firebase/init";
 import { collection, addDoc, updateDoc, doc } from "firebase/firestore";
 import { useInvoiceStore } from "@/stores/invoice";

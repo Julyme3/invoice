@@ -118,12 +118,11 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from "vue-router";
 import { useInvoiceStore } from "@/stores/invoice";
-import { computed, ref } from "vue";
+import { computed } from "vue";
 
 const route = useRoute();
 const router = useRouter();
 const invoiceStore = useInvoiceStore();
-const filter = ref("");
 
 const currentInvoice = computed(() => {
   return invoiceStore.getInvoiceById(route.params.id as string);

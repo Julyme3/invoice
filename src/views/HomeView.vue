@@ -1,6 +1,10 @@
 <template>
   <main class="home">
-    <Header v-model="filter" />
+    <Header
+      v-model="filter"
+      :amount="filteredInvoices.length"
+      @openInvoiceModal="openInvoiceModal"
+    />
     <template v-if="filteredInvoices.length">
       <Invoice
         v-for="(invoice, i) in filteredInvoices"
@@ -35,6 +39,9 @@ const filteredInvoices = computed(() => {
     return invoice[filter.value];
   });
 });
+const openInvoiceModal = () => {
+  invoiceStore.toggleModalShown();
+};
 </script>
 
 <style scoped lang="less">

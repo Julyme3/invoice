@@ -2,7 +2,7 @@
   <div class="header">
     <div class="left">
       <h1 class="title">Invoices</h1>
-      <span>There are 4 total invoices</span>
+      <span>There are {{ amount }} total invoices</span>
     </div>
     <div class="right">
       <div class="filter" @click="toggleFilterMenu">
@@ -57,13 +57,12 @@
 
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import { useInvoiceStore } from "@/stores/invoice";
 
-const invoiceStore = useInvoiceStore();
 const props = defineProps<{
   modelValue: string;
+  amount: number;
 }>();
-const emit = defineEmits(["update:modelValue"]);
+const emit = defineEmits(["update:modelValue", "openInvoiceModal"]);
 
 const localFilter = computed({
   get() {
@@ -79,7 +78,7 @@ const toggleFilterMenu = () => {
   isFilterShown.value = !isFilterShown.value;
 };
 const createInvoice = () => {
-  invoiceStore.toggleModalShown();
+  emit("openInvoiceModal");
 };
 </script>
 

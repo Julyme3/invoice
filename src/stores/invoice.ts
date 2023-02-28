@@ -7,6 +7,7 @@ import {
   doc,
   updateDoc,
 } from "firebase/firestore";
+import type { IInvoice } from "@/types/invoice";
 
 export const useInvoiceStore = defineStore("invoice", {
   state: () => {
@@ -38,8 +39,7 @@ export const useInvoiceStore = defineStore("invoice", {
     },
     async fetchInvoices() {
       const results = await getDocs(collection(db, "invoices"));
-      const process = [];
-      // TODO add typed api
+      const process: IInvoice[] = [];
       results.forEach((doc) => {
         const data = {
           docId: doc.id,

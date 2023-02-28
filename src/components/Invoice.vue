@@ -27,42 +27,13 @@
 </template>
 
 <script setup lang="ts">
-// TODO replace to types.ts
-interface LineItem {
-  id: string;
-  itemName: string;
-  qty: string;
-  price: number;
-  total: number;
-}
-// TODO replace to types.ts
-interface Invoice {
-  billerStreetAddress: null;
-  billerCity: null;
-  billerZipCode: null;
-  billerCountry: null;
-  clientName: null;
-  clientEmail: null;
-  clientStreetAddress: null;
-  clientCity: null;
-  clientZipCode: null;
-  clientCountry: null;
-  invoiceDateUnix: number;
-  invoiceDate: null | string;
-  paymentTerms: string;
-  paymentDueDateUnix: number;
-  paymentDueDate: string;
-  productDescription: null;
-  invoicePending: boolean;
-  invoiceDraft: boolean;
-  invoiceItemList: LineItem[];
-}
+import { IInvoice } from "@/types/invoice";
 
 interface Props {
-  invoice: Invoice;
+  invoice: IInvoice;
 }
 
-const props = defineProps<Props>();
+defineProps<Props>();
 </script>
 
 <style scoped lang="less">
