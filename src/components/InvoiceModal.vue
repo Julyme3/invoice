@@ -199,7 +199,7 @@
               </td>
               <SvgIcon
                 class="delete-icon"
-                @click="deleteInvoiceItem(item.id)"
+                @click="deleteInvoiceItem(index)"
                 name="icon-delete"
               />
             </tr>
@@ -257,6 +257,8 @@ import { collection, addDoc, updateDoc, doc } from "firebase/firestore";
 import { useInvoiceStore } from "@/stores/invoice";
 import SvgIcon from "@/components/SvgIcon.vue";
 import Loading from "@/components/Loading.vue";
+import Invoice from "@/modules/invoice/invoice";
+import LineItem from "@/modules/lineItem/lineItem";
 
 const invoiceStore = useInvoiceStore();
 const route = useRoute();
@@ -285,16 +287,11 @@ const stateForm = ref<IInvoice>({
   invoiceTotal: 0,
 });
 
-// replace to utils for date formatting
 if (!invoiceStore.isEditingInvoice) {
   stateForm.value.invoiceDateUnix = Date.now();
-  stateForm.value.invoiceDate = new Date(
+  stateForm.value.invoiceDate = Invoice.convertDate(
     stateForm.value.invoiceDateUnix
-  ).toLocaleDateString("en-us", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+  );
 } else {
   stateForm.value = JSON.parse(
     JSON.stringify(invoiceStore.getInvoiceById(route.params.id as string)!)
@@ -312,23 +309,12 @@ watch(
     stateForm.value.paymentDueDateUnix = futureDate.setDate(
       futureDate.getDate() + parseInt(stateForm.value.paymentTerms)
     );
-    stateForm.value.paymentDueDate = new Date(
+    stateForm.value.paymentDueDate = Invoice.convertDate(
       stateForm.value.paymentDueDateUnix
-    ).toLocaleDateString("en-us", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+    );
   },
   { immediate: true }
 );
-//
-
-const inVoiceTotal = computed(() => {
-  return stateForm.value.invoiceItemList.reduce((acc, curr) => {
-    return (acc += curr.total);
-  }, 0);
-});
 
 const isLoading = ref(false);
 
@@ -339,31 +325,8 @@ const uploadInvoice = async () => {
   }
 
   isLoading.value = true;
-  // TODO: add interface for db API
-  const data: IInvoice = {
-    billerStreetAddress: stateForm.value.billerStreetAddress,
-    billerCity: stateForm.value.billerCity,
-    billerZipCode: stateForm.value.billerZipCode,
-    billerCountry: stateForm.value.billerCountry,
-    clientName: stateForm.value.clientName,
-    clientEmail: stateForm.value.clientEmail,
-    clientStreetAddress: stateForm.value.clientStreetAddress,
-    clientCity: stateForm.value.clientCity,
-    clientZipCode: stateForm.value.clientZipCode,
-    clientCountry: stateForm.value.clientCountry,
-    invoiceDate: stateForm.value.invoiceDate,
-    invoiceDateUnix: stateForm.value.invoiceDateUnix,
-    paymentTerms: stateForm.value.paymentTerms,
-    paymentDueDate: stateForm.value.paymentDueDate,
-    paymentDueDateUnix: stateForm.value.paymentDueDateUnix,
-    productDescription: stateForm.value.productDescription,
-    invoiceItemList: stateForm.value.invoiceItemList,
-    invoiceTotal: inVoiceTotal.value,
-    invoicePending: stateForm.value.invoicePending,
-    invoiceDraft: stateForm.value.invoiceDraft,
-    invoicePaid: false,
-  };
-  await addDoc(collection(db, "invoices"), data);
+  const invoice = Invoice.create(stateForm.value);
+  await addDoc(collection(db, "invoices"), invoice);
 
   isLoading.value = false;
   invoiceStore.toggleModalShown();
@@ -379,26 +342,8 @@ const updateInvoice = async () => {
   isLoading.value = true;
   const invoiceRef = doc(db, "invoices", stateForm.value.docId!);
 
-  const data: Partial<IInvoice> = {
-    billerStreetAddress: stateForm.value.billerStreetAddress,
-    billerCity: stateForm.value.billerCity,
-    billerZipCode: stateForm.value.billerZipCode,
-    billerCountry: stateForm.value.billerCountry,
-    clientName: stateForm.value.clientName,
-    clientEmail: stateForm.value.clientEmail,
-    clientStreetAddress: stateForm.value.clientStreetAddress,
-    clientCity: stateForm.value.clientCity,
-    clientZipCode: stateForm.value.clientZipCode,
-    clientCountry: stateForm.value.clientCountry,
-    paymentTerms: stateForm.value.paymentTerms,
-    paymentDueDate: stateForm.value.paymentDueDate,
-    paymentDueDateUnix: stateForm.value.paymentDueDateUnix,
-    productDescription: stateForm.value.productDescription,
-    invoiceItemList: stateForm.value.invoiceItemList,
-    invoiceTotal: stateForm.value.invoiceTotal,
-  };
-
-  await updateDoc(invoiceRef, data);
+  const invoice = Invoice.create(stateForm.value);
+  await updateDoc(invoiceRef, invoice);
 
   isLoading.value = false;
   invoiceStore.toggleModalShown();
@@ -412,6 +357,7 @@ const submitForm = () => {
     uploadInvoice();
   }
 };
+
 const publishInvoice = () => {
   stateForm.value.invoicePending = true;
 };
@@ -424,19 +370,18 @@ const closeInvoice = () => {
 };
 
 const addNewInvoiceItem = () => {
-  const item: ILineItem = {
+  const newLineItem = LineItem.create({
     id: uuid4(),
     itemName: "",
-    qty: "",
+    qty: 0,
     price: 0,
     total: 0,
-  };
-  stateForm.value.invoiceItemList.push(item);
+  });
+  stateForm.value = Invoice.addLineItem(stateForm.value, newLineItem);
 };
-const deleteInvoiceItem = (id: string) => {
-  stateForm.value.invoiceItemList = stateForm.value.invoiceItemList.filter(
-    (item) => item.id !== id
-  );
+
+const deleteInvoiceItem = (index: number) => {
+  stateForm.value = Invoice.removeLineItem(stateForm.value, index);
 };
 
 const invoiceWrap = ref<HTMLDivElement | null>(null);

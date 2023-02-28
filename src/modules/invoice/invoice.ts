@@ -2,14 +2,16 @@ import type { IInvoice } from "@/types/invoice";
 import type { ILineItem } from "@/types/lineItem";
 import LineItem from "@/modules/lineItem/lineItem";
 
-const setLineItems = (invoice: IInvoice, lineItems: ILineItem[]): IInvoice => {
+const setLineItems = (
+  invoice: IInvoice,
+  invoiceItemList: ILineItem[]
+): IInvoice => {
   const updatedInvoice = {
     ...invoice,
-    lineItems,
+    invoiceItemList,
   };
   return {
     ...updatedInvoice,
-    invoiceTotal: calculateTotal(updatedInvoice),
   };
 };
 
@@ -22,7 +24,7 @@ const calculateTotal = (invoice: IInvoice): number => {
 };
 
 const create = (invoice: IInvoice): IInvoice => {
-  return { ...invoice };
+  return { ...invoice, invoiceTotal: calculateTotal(invoice) };
 };
 
 const addLineItem = (invoice: IInvoice, lineItem: ILineItem): IInvoice => {
@@ -48,4 +50,33 @@ const changeLineItem = (
   return setLineItems(invoice, lineItems);
 };
 
-export default { create, addLineItem, removeLineItem, changeLineItem };
+const changeInvoice = (
+  invoice: IInvoice,
+  update: Partial<IInvoice>
+): IInvoice => {
+  const updated = {
+    ...invoice,
+    ...update,
+  };
+  return { ...updated, invoiceTotal: calculateTotal(updated) };
+};
+
+const convertDate = (
+  dateUnix: number,
+  options: Intl.DateTimeFormatOptions = {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  }
+) => {
+  return new Date(dateUnix).toLocaleDateString("en-us", options);
+};
+
+export default {
+  create,
+  addLineItem,
+  removeLineItem,
+  changeLineItem,
+  changeInvoice,
+  convertDate,
+};
