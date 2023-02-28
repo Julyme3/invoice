@@ -1,7 +1,7 @@
 export interface ILineItem {
   id: string;
   itemName: string;
-  qty: string;
+  qty: number;
   price: number;
   total: number;
 }
