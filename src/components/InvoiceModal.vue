@@ -251,8 +251,6 @@ import { watch, computed, ref } from "vue";
 import { useRoute } from "vue-router";
 import { v4 as uuid4 } from "uuid";
 import { IInvoice } from "@/types/invoice";
-import db from "@/firebase/init";
-import { collection, addDoc, updateDoc, doc } from "firebase/firestore";
 import { useInvoiceStore } from "@/stores/invoice";
 import SvgIcon from "@/components/SvgIcon.vue";
 import Loading from "@/components/Loading.vue";
@@ -323,35 +321,23 @@ const uploadInvoice = async () => {
     return;
   }
 
-  isLoading.value = true;
   const invoice = Invoice.create(stateForm.value);
-  await addDoc(collection(db, "invoices"), invoice);
-
-  isLoading.value = false;
-  invoiceStore.toggleModalShown();
-  invoiceStore.fetchInvoices();
+  await invoiceStore.uploadInvoice(invoice);
 };
 
-const updateInvoice = async () => {
+const changeInvoice = async () => {
   if (!stateForm.value.invoiceItemList.length) {
     alert("Please ensure you filled out work items!");
     return;
   }
 
-  isLoading.value = true;
-  const invoiceRef = doc(db, "invoices", stateForm.value.docId!);
-
   const invoice = Invoice.create(stateForm.value);
-  await updateDoc(invoiceRef, invoice);
-
-  isLoading.value = false;
-  invoiceStore.toggleModalShown();
-  invoiceStore.fetchInvoices();
+  await invoiceStore.changeInvoice(stateForm.value.docId!, invoice);
 };
 
 const submitForm = () => {
   if (invoiceStore.isEditingInvoice) {
-    updateInvoice();
+    changeInvoice();
   } else {
     uploadInvoice();
   }

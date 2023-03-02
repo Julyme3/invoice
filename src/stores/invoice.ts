@@ -1,14 +1,13 @@
 import { defineStore } from "pinia";
-import db from "@/firebase/init";
-import {
-  collection,
-  getDocs,
-  deleteDoc,
-  doc,
-  updateDoc,
-} from "firebase/firestore";
 import type { IInvoice } from "@/types/invoice";
+import InvoiceService from "@/services/invoice";
 
+export type RootState = {
+  isInvoiceModalShown: boolean;
+  isPopupShown: boolean;
+  invoicesData: IInvoice[];
+  isEditingInvoice: boolean;
+};
 export const useInvoiceStore = defineStore("invoice", {
   state: () => {
     return {
@@ -16,7 +15,7 @@ export const useInvoiceStore = defineStore("invoice", {
       isPopupShown: false,
       invoicesData: [],
       isEditingInvoice: false,
-    };
+    } as RootState;
   },
   getters: {
     getInvoiceById: (state) => {
@@ -38,44 +37,13 @@ export const useInvoiceStore = defineStore("invoice", {
       this.isPopupShown = !this.isPopupShown;
     },
     async fetchInvoices() {
-      const results = await getDocs(collection(db, "invoices"));
-      const process: IInvoice[] = [];
-      results.forEach((doc) => {
-        const data = {
-          docId: doc.id,
-          billerStreetAddress: doc.data().billerStreetAddress,
-          billerCity: doc.data().billerCity,
-          billerZipCode: doc.data().billerZipCode,
-          billerCountry: doc.data().billerCountry,
-          clientName: doc.data().clientName,
-          clientEmail: doc.data().clientEmail,
-          clientStreetAddress: doc.data().clientStreetAddress,
-          clientCity: doc.data().clientCity,
-          clientZipCode: doc.data().clientZipCode,
-          clientCountry: doc.data().clientCountry,
-          invoiceDateUnix: doc.data().invoiceDateUnix,
-          invoiceDate: doc.data().invoiceDate,
-          paymentTerms: doc.data().paymentTerms,
-          paymentDueDateUnix: doc.data().paymentDueDateUnix,
-          paymentDueDate: doc.data().paymentDueDate,
-          productDescription: doc.data().productDescription,
-          invoiceItemList: doc.data().invoiceItemList,
-          invoiceTotal: doc.data().invoiceTotal,
-          invoicePending: doc.data().invoicePending,
-          invoiceDraft: doc.data().invoiceDraft,
-          invoicePaid: doc.data().invoicePaid,
-        };
-        process.push(data);
-      });
-      this.invoicesData = [...process];
+      this.invoicesData = await InvoiceService.readInvoices();
     },
-    async deleteInvoice(docId: string) {
-      const docRef = doc(db, "invoices", docId);
-      await deleteDoc(docRef);
+    async deleteInvoice(docId: string): Promise<void> {
+      await InvoiceService.deleteInvoice(docId);
     },
     async updateStatusToPaid(docId: string) {
-      const docRef = doc(db, "invoices", docId);
-      await updateDoc(docRef, {
+      await InvoiceService.updateInvoice(docId, {
         invoicePaid: true,
         invoicePending: false,
       });
@@ -83,14 +51,23 @@ export const useInvoiceStore = defineStore("invoice", {
       await this.fetchInvoices();
     },
     async updateStatusToPending(docId: string) {
-      const docRef = doc(db, "invoices", docId);
-      await updateDoc(docRef, {
+      await InvoiceService.updateInvoice(docId, {
         invoicePaid: false,
         invoicePending: true,
         invoiceDraft: false,
       });
 
       await this.fetchInvoices();
+    },
+    async uploadInvoice(invoice: IInvoice) {
+      await InvoiceService.createInvoice(invoice);
+      this.toggleModalShown();
+      this.fetchInvoices();
+    },
+    async changeInvoice(docId: string, update: IInvoice) {
+      await InvoiceService.updateInvoice(docId, update);
+      this.toggleModalShown();
+      this.fetchInvoices();
     },
   },
 });
